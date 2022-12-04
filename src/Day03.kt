@@ -1,19 +1,18 @@
 fun main() {
     fun part1(input: List<String>): Int {
         return input.sumOf {
-            val (left, right) = it.toCharArray().toList().chunked(it.length / 2)
-            val common = left.intersect(right.toSet()).first()
-            if (common >= 'a') (common - 'a') + 1
-            else (common - 'A') + 27
+            it.chunked(it.length / 2)
+                .map { half -> half.toSet() }
+                .let { (left, right) -> left intersect right }
+                .single().priority
         }
     }
 
     fun part2(input: List<String>): Int {
         return input.chunked(3).sumOf {
-            val (elf1, elf2, elf3) = it.map { line -> line.toCharArray().toSet() }
-            val common = elf1.intersect(elf2).intersect(elf3).first()
-            if (common >= 'a') (common - 'a') + 1
-            else (common - 'A') + 27
+            it.map { line -> line.toSet() }
+                .let { (elf1, elf2, elf3) -> elf1 intersect elf2 intersect elf3 }
+                .single().priority
         }
     }
 
@@ -26,3 +25,5 @@ fun main() {
     println(part1(input))
     println(part2(input))
 }
+
+val Char.priority: Int get() = if (isLowerCase()) (this - 'a') + 1 else (this - 'A') + 27

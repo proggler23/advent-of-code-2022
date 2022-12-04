@@ -14,8 +14,8 @@ private fun List<String>.partitionBy(separator: String): List<List<String>> {
 }
 
 fun main() {
-    fun part1(input: List<String>): Int? {
-        return input.partitionBy("").maxOfOrNull {
+    fun part1(input: List<String>): Int {
+        return input.partitionBy("").maxOf {
             it.sumOf { line -> line.toInt() }
         }
     }

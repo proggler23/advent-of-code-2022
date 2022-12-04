@@ -1,18 +1,14 @@
 fun main() {
     fun part1(input: List<String>): Int {
-        val selections = input.map {
-            val (opp, self) = it.split(" ")
-            SelectionStrategy(Decision.valueOf(opp), Strategy.valueOf(self))
+        return input.sumOf {
+            it.split(" ").map { dec -> Decision.parseFrom(dec) }.let { (opp, self) -> self.scoreAgainst(opp) }
         }
-        return selections.sumOf { it.score1 }
     }
 
     fun part2(input: List<String>): Int {
-        val selections = input.map {
-            val (opp, self) = it.split(" ")
-            SelectionStrategy(Decision.valueOf(opp), Strategy.valueOf(self))
+        return input.sumOf {
+            it.split(" ").let { (opp, self) -> Strategy.parseFrom(self).scoreAgainst(Decision.parseFrom(opp)) }
         }
-        return selections.sumOf { it.score2 }
     }
 
     // test if implementation meets criteria from the description, like:
@@ -25,35 +21,57 @@ fun main() {
     println(part2(input))
 }
 
-data class SelectionStrategy(val opp: Decision, val self: Strategy) {
-    val score1: Int get() = self.value + self.scoreAgainst(opp)
-    val score2: Int get() = opp.scoreAgainst(self)
-}
+enum class Decision {
+    ROCK,
+    PAPER,
+    SCISSOR;
 
-enum class Decision(val description: String) {
-    A("Rock"),
-    B("Paper"),
-    C("Scissor");
+    val winsAgainst: Decision
+        get() = when (this) {
+            ROCK -> SCISSOR
+            PAPER -> ROCK
+            SCISSOR -> PAPER
+        }
 
-    fun scoreAgainst(strategy: Strategy): Int {
-        val self = Strategy.values()[(ordinal + when (strategy) {
-            Strategy.X -> 2
-            Strategy.Y -> 0
-            Strategy.Z -> 1
-        }) % 3]
-        return self.value + self.scoreAgainst(this)
+    val loosesAgainst: Decision
+        get() = when (this) {
+            ROCK -> PAPER
+            PAPER -> SCISSOR
+            SCISSOR -> ROCK
+        }
+
+    fun scoreAgainst(decision: Decision): Int {
+        val score = if (this.loosesAgainst == decision) 0 else if (this.winsAgainst == decision) 6 else 3
+        return 1 + ordinal + score
+    }
+
+    companion object {
+        fun parseFrom(str: String) = when (str) {
+            "A", "X" -> ROCK
+            "B", "Y" -> PAPER
+            "C", "Z" -> SCISSOR
+            else -> error("")
+        }
     }
 }
 
-enum class Strategy(val description: String, val value: Int) {
-    X("Loss", 1),
-    Y("Draw", 2),
-    Z("Win", 3);
+enum class Strategy {
+    LOSS,
+    DRAW,
+    WIN;
 
-    fun scoreAgainst(opp: Decision) = when ((3 + ordinal - opp.ordinal) % 3) {
-        0 -> 3
-        1 -> 6
-        2 -> 0
-        else -> error("cannot happen")
+    fun scoreAgainst(decision: Decision) = when (this) {
+        DRAW -> decision.scoreAgainst(decision)
+        LOSS -> decision.winsAgainst.scoreAgainst(decision)
+        WIN -> decision.loosesAgainst.scoreAgainst(decision)
+    }
+
+    companion object {
+        fun parseFrom(str: String) = when (str) {
+            "X" -> LOSS
+            "Y" -> DRAW
+            "Z" -> WIN
+            else -> error("")
+        }
     }
 }
