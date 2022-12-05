@@ -1,12 +1,12 @@
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.parse().count { (elf1, elf2) ->
+        return input.parse4().count { (elf1, elf2) ->
             (elf1.first in elf2 && elf1.last in elf2) || (elf2.first in elf1 && elf2.last in elf1)
         }
     }
 
     fun part2(input: List<String>): Int {
-        return input.parse().count { (elf1, elf2) ->
+        return input.parse4().count { (elf1, elf2) ->
             (elf1.first in elf2 || elf1.last in elf2) || (elf2.first in elf1 || elf2.last in elf1)
         }
     }
@@ -21,7 +21,7 @@ fun main() {
     println(part2(input))
 }
 
-fun List<String>.parse() = map { line ->
+fun List<String>.parse4() = map { line ->
     line.split(',').map { range ->
         range.split('-')
             .map { it.toInt() }
