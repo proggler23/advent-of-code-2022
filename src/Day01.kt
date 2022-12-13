@@ -1,4 +1,4 @@
-private fun List<String>.partitionBy(separator: String): List<List<String>> {
+fun List<String>.partitionBy(separator: String): List<List<String>> {
     return buildList {
         val list = mutableListOf<String>()
         for (value in this@partitionBy) {
