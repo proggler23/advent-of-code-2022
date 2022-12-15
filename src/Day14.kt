@@ -3,7 +3,7 @@ import kotlin.math.min
 
 fun main() {
     fun part1(input: List<String>): Int {
-        return input.parse14().dropSand()
+        return input.parse14().dropSand1()
     }
 
     fun part2(input: List<String>): Int {
@@ -28,26 +28,23 @@ enum class Material {
 
 fun List<String>.parse14(): Cave {
     val grid = Array(1000) { Array(500) { Material.AIR } }
-    flatMap { line ->
+    for (line in this) {
         line.split("->")
             .map { coords -> coords.trim().split(",").let { (x, y) -> x.toInt() to y.toInt() } }
-            .fold(emptyList<Pair<Int, Int>>()) { acc, (x, y) ->
-                if (acc.isEmpty()) listOf(x to y)
-                else acc + (acc.last().let { (lx, ly) ->
-                    (min(lx, x)..max(lx, x)).flatMap { nx ->
-                        (min(ly, y)..max(
-                            ly,
-                            y
-                        )).map { ny -> nx to ny }
+            .zipWithNext().forEach { (coord1, coord2) ->
+                (min(coord1.first, coord2.first)..max(coord1.first, coord2.first)).forEach { x ->
+                    (min(coord1.second, coord2.second)..max(coord1.second, coord2.second)).forEach { y ->
+                        grid[x][y] = Material.ROCK
                     }
-                }) + (x to y)
+                }
             }
-    }.forEach { (x, y) -> grid[x][y] = Material.ROCK }
+    }
     return Cave(grid)
 }
 
 data class Cave(val grid: Array<Array<Material>>) {
-    val lowestRock = grid.indices.flatMap { x -> grid[x].indices.filter { y -> grid[x][y] == Material.ROCK } }.max()
+    private val lowestRock =
+        grid.indices.flatMap { x -> grid[x].indices.filter { y -> grid[x][y] == Material.ROCK } }.max()
 
     private fun dropSand(predicate: (Pair<Int, Int>) -> Boolean): Int {
         for (i in 0..Int.MAX_VALUE) {
@@ -63,7 +60,7 @@ data class Cave(val grid: Array<Array<Material>>) {
         return -1
     }
 
-    fun dropSand() = dropSand { (_, y) -> y > lowestRock }
+    fun dropSand1() = dropSand { (_, y) -> y > lowestRock }
     fun dropSand2() = dropSand { (x, y) -> grid[x][y] == Material.SAND }
 
     private fun Pair<Int, Int>.move(): Pair<Int, Int> {
